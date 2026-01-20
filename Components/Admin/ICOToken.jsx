@@ -1,7 +1,148 @@
-import React from "react";
+import React, { useState, useEffect } from 'react'
+import { useAccount } from 'wagmi'
+import { LOAD_TOKEN_ICO } from '../../Context/constants'
+import {
+  UPDATE_TOKEN,
+  UPDATE_TOKEN_PRICE,
+  WITHDRAW_TOKEN,
+} from '../../Context/index'
 
-const ICOToken = () => {
-  return <div>ICOToken</div>;
-};
+import ButtonCmp from './RegularComp/ButtonCmp'
+import InputField from './RegularComp/InputField'
+import ClickButton from './RegularComp/ClickButton'
+import Title from './RegularComp/Title'
 
-export default ICOToken;
+const CURRENCY = process.env.NEXT_PUBLIC_CURRENCY
+const ICOToken = ({ setLoader }) => {
+  const { address } = useAccount()
+  const [tokenDetails, setTokenDetails] = useState()
+  const [updateToken, setUpdateToken] = useState()
+  const [updatePrice, setUpdatePrice] = useState()
+
+  useEffect(() => {
+    const loadToken = async () => {
+      const token = await LOAD_TOKEN_ICO()
+      console.log(token)
+      setTokenDetails(token)
+    }
+    loadToken()
+  }, [address])
+
+  const CALLING_FUNCTION_UPDATE_TOKEN = async () => {
+    setLoader(true)
+    console.log(updateToken)
+    const receipt = await UPDATE_TOKEN(updateToken)
+    if (receipt?.blockNumber) {
+      console.log(receipt)
+      setLoader(false)
+      window.location.reload()
+    }
+    setLoader(false)
+  }
+
+  const CALLING_FUNCTION_UPDATE_PRICE = async () => {
+    setLoader(true)
+    console.log(updatePrice)
+    const receipt = await UPDATE_TOKEN_PRICE(updatePrice)
+    if (receipt?.blockNumber) {
+      console.log(receipt)
+      setLoader(false)
+      window.location.reload()
+    }
+    setLoader(false)
+  }
+
+  const CALLING_FUNCTION_TOKENL_WITHDRAW = async () => {
+    setLoader(true)
+    const receipt = await WITHDRAW_TOKEN()
+    if (receipt?.blockNumber) {
+      console.log(receipt)
+      setLoader(false)
+      window.location.reload()
+    }
+    setLoader(false)
+  }
+  return (
+    <div className="tab-pane fade" id="tab-6" role="tabpanel">
+      <div className="row">
+        <div className="col-12">
+          <div className="profile">
+            <ul
+              className="nav nav-tabs section__tabs section__tabs--left"
+              id="section__profile-tabs2"
+              role="tablist"
+            >
+              <ButtonCmp name="Update Token" tab="f9" styleClass="active" />
+              <ButtonCmp name="Update Token Price" tab="f10" />
+              <ButtonCmp name="Withdraw Token" tab="f11" />
+            </ul>
+
+            <div className="tab-content">
+              <div
+                className="tab-pane fade show active"
+                id="tab-f9"
+                role="tabpanel"
+              >
+                <div className="row">
+                  <Title title="Update Token Address in ICO Contract" />
+                  <InputField
+                    size="12"
+                    type="text"
+                    title="Address"
+                    name="crypto"
+                    placeholder={`${tokenDetails?.token.symbol} ${tokenDetails?.token.name}`}
+                    handleChange={(e) => {
+                      setUpdateToken(e.target.value)
+                    }}
+                  />
+                  <ClickButton
+                    name="Update Token"
+                    handleClick={() => {
+                      CALLING_FUNCTION_UPDATE_TOKEN()
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="tab-pane fade" id="tab-f10" role="tabpanel">
+                <div className="row">
+                  <Title title="Update Token Price in ICO Contract" />
+                  <InputField
+                    size="12"
+                    type="text"
+                    title="Price"
+                    name="price1"
+                    placeholder={`${tokenDetails?.tokenPrice} ${CURRENCY}`}
+                    handleChange={(e) => {
+                      setUpdatePrice(e.target.value)
+                    }}
+                  />
+                  <ClickButton
+                    name="Update Price"
+                    handleClick={() => {
+                      CALLING_FUNCTION_UPDATE_PRICE()
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="tab-pane fade" id="tab-f11" role="tabpanel">
+                <div className="row">
+                  <Title title="Withdraw Token from ICO Contract" />
+                  <ClickButton
+                    name="Withdraw ALL Token"
+                    handleClick={() => {
+                      CALLING_FUNCTION_TOKENL_WITHDRAW()
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default ICOToken
