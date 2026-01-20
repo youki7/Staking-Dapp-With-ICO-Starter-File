@@ -675,7 +675,7 @@ contract StakingDapp is Ownable, ReentrancyGuard {
         pool.depositAmount -= _amount;
         depositedTokens[address(pool.depositToken)] -= _amount;
         pool.depositToken.transfer(msg.sender, pending);
-        _createNotification(_pid, pending, msg.sender, "Withdraw");
+        _createNotification(_pid, _amount, msg.sender, "Withdraw");
     }
 
     function _calcPendingReward(
@@ -729,7 +729,7 @@ contract StakingDapp is Ownable, ReentrancyGuard {
         user.lastRewardAt = block.timestamp;
 
         pool.rewardToken.transfer(msg.sender, pending);
-        _createNotification(_pid, pending, msg.sender, "Withdraw");
+        _createNotification(_pid, pending, msg.sender, "Claim");
     }
 
     function _createNotification(
